@@ -1,6 +1,7 @@
+wheel
 fastapi==0.111.0
+uvicorn
 matplotlib==3.8.4
 numpy==1.26.4
 pandas==2.2.2
 pmdarima==2.0.4
-setuptools==63.2.0

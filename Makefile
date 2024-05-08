@@ -1,4 +1,4 @@
 .DEFAULT_GOAL := default
 
 run_api:
-	uvicorn walmart.api.fast:app --reload
+	uvicorn project_walmart.api.fast:app --reload
