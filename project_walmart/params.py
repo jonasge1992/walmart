@@ -1,3 +1,5 @@
+import os
+
 ##################  VARIABLES  ##################
 DATA_SIZE = os.environ.get("DATA_SIZE")
 CHUNK_SIZE = int(os.environ.get("CHUNK_SIZE"))
@@ -17,6 +19,8 @@ PREFECT_LOG_LEVEL = os.environ.get("PREFECT_LOG_LEVEL")
 EVALUATION_START_DATE = os.environ.get("EVALUATION_START_DATE")
 GAR_IMAGE = os.environ.get("GAR_IMAGE")
 GAR_MEMORY = os.environ.get("GAR_MEMORY")
+data_source = os.environ.get("DATA_SOURCE")  # if a default value is ok
+data_source = os.environ["DATA_SOURCE"]      # to fail when the conf is missing
 
 
 def validate_env_value(env, valid_options):
