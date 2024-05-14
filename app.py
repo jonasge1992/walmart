@@ -2,33 +2,33 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import math
-# Configuración de la página para usar todo el ancho disponible
+# Setting page configuration to use the full available width
 st.set_page_config(layout="wide")
 
-# Menú en la barra lateral para selección de la página
+# Sidebar menu for page selection
 st.sidebar.title("Navigation")
 page = st.sidebar.selectbox("Choose a page", ["Home", "Forecasting", "Sales Analysis", "Product Analysis", "Interpretation"])
 
-# Cargar el DataFrame principal para las demás páginas
+# Load the main DataFrame for other pages
 merge_scaled_df = pd.read_csv("raw_data/merge_df_scaled.csv")
 
-# Función auxiliar para extraer categorías y sumar ventas
+# Helper function to extract categories and sum sales
 def get_category_sales(df):
     df['category'] = df['id'].apply(lambda x: x.split('_')[0])
     return df.groupby('category')['sales'].sum().reset_index()
 
-# Página Principal
+# Home Page
 if page == "Home":
     st.title("Welcome to the M5 Forecasting System")
     st.markdown("### Our objective is to predict sales for the next 28 days using sales records from 2011-01-29 to 2016-06-19.")
     data = pd.read_csv("raw_data/merge_df_scaled.csv")
-    st.write(data.head())  # Muestra las primeras filas del DataFrame
+    st.write(data.head())  # Display the first few rows of the DataFrame
 
     st.markdown("### Now, we will use the ARIMA model to predict sales 28 days ahead.")
     if st.button("Make Prediction", help="Make prediction using ARIMA model"):
-        # Aquí irá el código para realizar la predicción con ARIMA
+        # Here goes the code to perform prediction with ARIMA
         st.write("Prediction made successfully!")
-# Visión General de los Datos
+# Forecasting Page
 elif page == "Forecasting":
     st.title("Forecasting")
     st.markdown("### Behold the sales forecast for the next 28 days ")
@@ -37,33 +37,32 @@ elif page == "Forecasting":
     st.write("The RMSE has a value of: ")
 
 
-# Análisis de Ventas por Categoría
+# Sales Analysis Page
 elif page == "Sales Analysis":
     st.title("Sales Analysis")
 
-    # Gráfico de ventas totales por categoría
+    # Total Sales by Category Bar Chart
     st.markdown("### Total Sales by Category")
     category_sales = get_category_sales(merge_scaled_df)
     fig_bar = px.bar(category_sales, x='category', y='sales', title='Sales by Category', labels={'sales': 'Total Sales', 'category': 'Category'})
     st.plotly_chart(fig_bar, use_container_width=True)
 
-    # Gráfico de ventas de los últimos 28 días
+    # Sales for the Last 28 Days Line Chart
     st.markdown("### Sales for the Last 28 Days")
-    # Filtrar los datos para obtener solo los últimos 28 días
     last_28_days_sales = merge_scaled_df.groupby('date')['sales'].sum().reset_index().tail(28)
     fig_last_28_days = px.line(last_28_days_sales, x='date', y='sales', title='Sales for the Last 28 Days', labels={'sales': 'Total Sales', 'date': 'Date'})
     st.plotly_chart(fig_last_28_days, use_container_width=True)
 
-    # Histograma de ventas diarias durante los últimos 28 días
+    # Daily Sales Histogram for the Last 28 Days
     fig_daily_sales_histogram = px.histogram(last_28_days_sales, x='date', y='sales', title='Daily Sales Histogram for the Last 28 Days', labels={'sales': 'Total Sales', 'date': 'Date'})
     st.plotly_chart(fig_daily_sales_histogram, use_container_width=True)
 
-    # Gráfico de ventas por categoría
+    # Sales by Category Pie Chart
     st.markdown("### Sales by Category")
     fig_pie = px.pie(category_sales, values='sales', names='category', title='Percentage of Sales by Category')
     st.plotly_chart(fig_pie, use_container_width=True)
 
-# Análisis de Productos
+# Product Analysis Page
 elif page == "Product Analysis":
     st.title("Product Analysis")
 
@@ -84,43 +83,44 @@ elif page == "Product Analysis":
     else:
         st.write("Select product filters to view data.")
 
+# Interpretation Page
 
 elif page == "Interpretation":
     st.title("Interpretation")
     st.write("HERE WE WILL PUT A MERGED DATASET WITH THE 28 DAYS")
 
-    # Convertir la columna 'date' a tipo datetime
+    # Convert the 'date' column to datetime type
     merge_scaled_df['date'] = pd.to_datetime(merge_scaled_df['date'])
 
-    # Obtener la fecha más reciente en los datos
+    # Get the most recent date in the data
     current_date = merge_scaled_df['date'].max()
-    # Calcular la fecha hace 12 meses
+    # Calculate the date 12 months ago
     one_year_ago_date = current_date - pd.DateOffset(days=28 * 12)
 
-    # Filtrar los datos para los últimos 12 periodos de 28 días
+    # Filter the data for the last 12 periods of 28 days
     last_12_intervals_data = merge_scaled_df[(merge_scaled_df['date'] >= one_year_ago_date) & (merge_scaled_df['date'] <= current_date)]
 
-    # Crear un nuevo DataFrame para almacenar las fechas y las ventas en intervalos de 28 días
+    # Create a new DataFrame to store dates and sales in 28-day intervals
     sales_28_days = pd.DataFrame(columns=['Date', 'Sales'])
 
-    # Iterar sobre los periodos de 28 días y calcular las ventas
+    # Iterate over the 28-day periods and calculate sales
     for i in range(12):
         start_date = current_date - pd.DateOffset(days=28 * (i + 1))
         end_date = current_date - pd.DateOffset(days=28 * i)
         sales_in_interval = merge_scaled_df[(merge_scaled_df['date'] >= start_date) & (merge_scaled_df['date'] <= end_date)]['sales'].sum()
         sales_28_days = pd.concat([sales_28_days, pd.DataFrame({'Date': [f'{start_date.strftime("%Y-%m-%d")} - {end_date.strftime("%Y-%m-%d")}'], 'Sales': [sales_in_interval]})], ignore_index=True)
 
-    # Calcular las variaciones entre intervalos
+    # Calculate   variactions between intervalos
     variation_last_interval = sales_28_days['Sales'].iloc[-1] - sales_28_days['Sales'].iloc[-2]
     variation_3_intervals = sales_28_days['Sales'].iloc[-1] - sales_28_days['Sales'].iloc[-4]
     variation_6_intervals = sales_28_days['Sales'].iloc[-1] - sales_28_days['Sales'].iloc[-7]
 
-    # Calcular las variaciones porcentuales
+    # calculate  percentages varations
     percentage_variation_last_interval = (variation_last_interval / sales_28_days['Sales'].iloc[-2]) * 100
     percentage_variation_3_intervals = (variation_3_intervals / sales_28_days['Sales'].iloc[-4]) * 100
     percentage_variation_6_intervals = (variation_6_intervals / sales_28_days['Sales'].iloc[-7]) * 100
 
-    # Mostrar las variaciones
+    # Showing variations
     st.write(f"Variation with respect to the last interval (Absolute): {variation_last_interval}")
     st.write(f"Variation with respect to the last interval (Percentage): {percentage_variation_last_interval}%")
     st.write(f"Variation with respect to every 3 intervals (Absolute): {variation_3_intervals}")
@@ -128,12 +128,12 @@ elif page == "Interpretation":
     st.write(f"Variation with respect to every 6 intervals (Absolute): {variation_6_intervals}")
     st.write(f"Variation with respect to every 6 intervals (Percentage): {percentage_variation_6_intervals}%")
 
-    # Crear un gráfico de barras para representar las ventas acumuladas cada 28 días
+   # Create a bar chart to represent the cumulative sales every 28 days.
     fig_histogram = px.bar(sales_28_days, x='Date', y='Sales', title='Total Sales in 28-Day Intervals',
                            labels={'Sales': 'Total Sales', 'Date': 'Date Interval'})
 
-    # Personalizar el diseño del histograma
+    # Customize the histogram layout
     fig_histogram.update_layout(xaxis_title='Date Interval', yaxis_title='Total Sales')
 
-    # Mostrar el gráfico de barras
+    # Display the bar chart
     st.plotly_chart(fig_histogram, use_container_width=True)
