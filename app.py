@@ -84,7 +84,6 @@ elif page == "Product Analysis":
         st.write("Select product filters to view data.")
 
 # Interpretation Page
-
 elif page == "Interpretation":
     st.title("Interpretation")
     st.write("HERE WE WILL PUT A MERGED DATASET WITH THE 28 DAYS")
@@ -103,12 +102,14 @@ elif page == "Interpretation":
     # Create a new DataFrame to store dates and sales in 28-day intervals
     sales_28_days = pd.DataFrame(columns=['Date', 'Sales'])
 
-    # Iterate over the 28-day periods and calculate sales
     for i in range(12):
         start_date = current_date - pd.DateOffset(days=28 * (i + 1))
         end_date = current_date - pd.DateOffset(days=28 * i)
         sales_in_interval = merge_scaled_df[(merge_scaled_df['date'] >= start_date) & (merge_scaled_df['date'] <= end_date)]['sales'].sum()
         sales_28_days = pd.concat([sales_28_days, pd.DataFrame({'Date': [f'{start_date.strftime("%Y-%m-%d")} - {end_date.strftime("%Y-%m-%d")}'], 'Sales': [sales_in_interval]})], ignore_index=True)
+
+    # Reverse the order of the DataFrame
+    sales_28_days = sales_28_days.iloc[::-1]
 
     # Calculate variations between intervals
     variation_last_interval = sales_28_days['Sales'].iloc[-1] - sales_28_days['Sales'].iloc[-2]
@@ -128,12 +129,12 @@ elif page == "Interpretation":
     st.write(f"Variation with respect to every 6 intervals (Absolute): {variation_6_intervals}")
     st.write(f"Variation with respect to every 6 intervals (Percentage): {percentage_variation_6_intervals}%")
 
-    # Crear un gráfico de barras para representar las ventas acumuladas cada 28 días
+    # Create a bar chart to represent total sales in 28-day intervals
     fig_histogram = px.bar(sales_28_days, x='Date', y='Sales', title='Total Sales in 28-Day Intervals',
                            labels={'Sales': 'Total Sales', 'Date': 'Date Interval'})
 
-    # Personalizar el diseño del histograma
+    # Customize the histogram layout
     fig_histogram.update_layout(xaxis_title='Date Interval', yaxis_title='Total Sales')
 
-    # Mostrar el gráfico de barras
+    # Display the bar chart
     st.plotly_chart(fig_histogram, use_container_width=True)
