@@ -14,10 +14,13 @@ def predict(id):
     loaded_model = pickle.load(open(os.path.join(full_path,"models",f"{id}_model.pkl"), 'rb'))
 
     #HOBBIES_1_008_CA_1_validation
+    model_name = loaded_model.__class__.__name__
+
+    print(model_name)
 
     forecast = loaded_model.predict(28)
 
-    model_name = loaded_model.__class__.__name__
+
 
     return {"id": id,
             "model": model_name,
