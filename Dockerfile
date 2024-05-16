@@ -1,4 +1,4 @@
-FROM python:3.10.6-slim
+FROM python:3.8.12-buster
 
 
 WORKDIR /prod
@@ -11,6 +11,7 @@ COPY models models
 COPY logs logs
 RUN pip install --upgrade pip
 RUN pip install .
+#RUN apt-get update && apt-get install -y libtbb2 libtbb-dev
 
 
 

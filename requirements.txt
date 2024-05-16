@@ -9,4 +9,4 @@ prophet
 statsmodels
 scikit-learn
 lightgbm
-darts
+#darts
