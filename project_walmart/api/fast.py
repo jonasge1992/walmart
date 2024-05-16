@@ -21,12 +21,20 @@ def predict(id):
 
     history = product_data.iloc[-224:-28]["sales"].to_dict()
 
-    actual = data_test["sales"].to_dict()
-
-
-
     model_name = loaded_model.__class__.__name__
-    print(model_name)
+
+    if model_name == "Prophet":
+        actual = {}
+        dates = data_test["date"]
+        sales = data_test["sales"]
+        for dateval, salesval in zip(dates,sales):
+            actual[dateval] = salesval
+    else:
+        actual = data_test["sales"].to_dict()
+
+
+
+
 
     if model_name == "Prophet":
         future_dates = loaded_model.make_future_dataframe(periods=28, freq='D')
