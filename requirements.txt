@@ -1,11 +1,12 @@
 wheel
-fastapi==0.111.0
+fastapi
 uvicorn
-matplotlib==3.8.4
-numpy==1.26.4
-pandas==2.2.2
-pmdarima==2.0.4
+matplotlib
+numpy
+pandas
+pmdarima
 prophet
 statsmodels
 scikit-learn
 lightgbm
+darts

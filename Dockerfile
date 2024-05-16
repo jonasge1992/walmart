@@ -8,8 +8,10 @@ COPY requirements.txt requirements.txt
 COPY project_walmart project_walmart
 COPY setup.py setup.py
 COPY models models
+COPY logs logs
 RUN pip install --upgrade pip
 RUN pip install .
+
 
 
 COPY Makefile Makefile
