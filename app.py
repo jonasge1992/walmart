@@ -153,22 +153,7 @@ if st.button("Make Prediction", help="Make prediction using the API"):
         )
         st.plotly_chart(fig_line)
 
-        # Add daily sales bar chart
-        st.markdown("### Daily Sales the last 28 days")
-        fig_bar_daily = px.bar(combined_df, x="date", y="sales", color="type", title="Daily Sales by Type",
-                               labels={"sales": "Daily Sales", "date": "Date"},
-                               color_discrete_map={
-                                   "Prediction": "green",
-                                   "Actual": "red",
-                                   "History": "skyblue"
-                               })
-        fig_bar_daily.update_layout(
-            autosize=False,
-            width=1800,
-            height=600,
-            margin=dict(l=50, r=50, b=100, t=100, pad=4)
-        )
-        st.plotly_chart(fig_bar_daily)
+
 
     except requests.exceptions.RequestException as e:
         st.error(f"An error occurred while making the API request: {e}")
