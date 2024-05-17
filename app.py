@@ -137,6 +137,14 @@ if st.button("Make Prediction", help="Make prediction using the API"):
         # Filter data from January 9, 2016 onwards
         combined_df = combined_df[combined_df["date"] >= pd.to_datetime('2016-01-09')]
 
+        # Pivot the DataFrame to have dates as columns
+        pivot_df = prediction_df.pivot(index="id", columns="date", values="sales").reset_index()
+        pivot_df.columns.name = None  # Remove column names
+
+        # Show the pivoted DataFrame
+        st.write("Predictions DataFrame:")
+        st.write(pivot_df)
+
         # Create the figure with custom traces
         fig = go.Figure()
 
