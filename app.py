@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
 import requests
 
 # Dictionary mapping visible names to corresponding IDs
@@ -113,6 +113,11 @@ if st.button("Make Prediction", help="Make prediction using the API"):
         actual_df["id"] = id_to_name_map[simulated_response["id"]]
         actual_df["type"] = "Actual"
 
+        # Print the first date and sales value from the actual data
+        first_actual_date = actual_df.iloc[0]['date']
+        first_actual_sales = actual_df.iloc[0]['sales']
+        st.write(f"The first date in actual data is {first_actual_date} and the sales value is {first_actual_sales}")
+
         # Convert historical data to a DataFrame
         history_df = pd.DataFrame(list(simulated_response["history"].items()), columns=["date", "sales"])
         history_df["date"] = pd.to_datetime(history_df["date"])
@@ -126,34 +131,50 @@ if st.button("Make Prediction", help="Make prediction using the API"):
         # Combine all DataFrames
         combined_df = pd.concat([combined_history_actual_df, prediction_df])
 
-        # Sort DataFrames by date to ensure continuity
+        # Ensure the combined DataFrame is sorted by date
         combined_df = combined_df.sort_values(by="date")
 
-        # Pivot the DataFrame to have dates as columns
-        pivot_df = prediction_df.pivot(index="id", columns="date", values="sales").reset_index()
-        pivot_df.columns.name = None  # Remove column names
+        # Filter data from January 9, 2016 onwards
+        combined_df = combined_df[combined_df["date"] >= pd.to_datetime('2016-01-09')]
 
-        # Show the pivoted DataFrame
-        st.write("Predictions DataFrame:")
-        st.write(pivot_df)
+        # Create the figure with custom traces
+        fig = go.Figure()
 
-        # Plot sales evolution
-        fig_line = px.line(combined_df, x="date", y="sales", color="type", title=f"Sales Forecast for {id_to_name_map[simulated_response['id']]} Over 28 Days",
-                           labels={"sales": "Sales", "date": "Date"},
-                           color_discrete_map={
-                               "Prediction": "green",
-                               "Actual": "red",
-                               "History": "skyblue"
-                           })
-        fig_line.update_layout(
+        # Add traces for history and actual data combined
+        combined_df['color'] = combined_df.apply(lambda row: 'red' if row['date'] >= pd.to_datetime('2016-03-28') else 'skyblue', axis=1)
+        combined_trace = go.Scatter(x=combined_df["date"], y=combined_df["sales"], mode='lines', name='History and Actual',
+                                    line=dict(color='skyblue'), showlegend=True)
+
+        fig.add_trace(combined_trace)
+
+        # Highlight the segment after March 28, 2016 with red color
+        actual_trace = go.Scatter(x=combined_df[combined_df["date"] >= pd.to_datetime('2016-03-28')]["date"],
+                                  y=combined_df[combined_df["date"] >= pd.to_datetime('2016-03-28')]["sales"],
+                                  mode='lines', name='Actual',
+                                  line=dict(color='red'), showlegend=True)
+
+        fig.add_trace(actual_trace)
+
+        # Add traces for prediction data
+        fig.add_trace(go.Scatter(x=combined_df[combined_df["type"] == "Prediction"]["date"],
+                                 y=combined_df[combined_df["type"] == "Prediction"]["sales"],
+                                 mode='lines',
+                                 name='Prediction',
+                                 line=dict(color='green')))
+
+        # Update the layout of the figure
+        fig.update_layout(
+            title=f"Sales Forecast for {id_to_name_map[simulated_response['id']]} Over 28 Days",
+            xaxis_title="Date",
+            yaxis_title="Sales",
             autosize=False,
             width=1800,
             height=600,
             margin=dict(l=50, r=50, b=100, t=100, pad=4)
         )
-        st.plotly_chart(fig_line)
 
-
+        # Display the figure
+        st.plotly_chart(fig)
 
     except requests.exceptions.RequestException as e:
         st.error(f"An error occurred while making the API request: {e}")
