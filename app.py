@@ -149,26 +149,26 @@ if st.button("Make Prediction", help="Make prediction using the API"):
         fig = go.Figure()
 
         # Add traces for history and actual data combined
-        combined_df['color'] = combined_df.apply(lambda row: 'red' if row['date'] >= pd.to_datetime('2016-03-28') else 'skyblue', axis=1)
+        combined_df['color'] = combined_df.apply(lambda row: 'lightblue' if row['date'] >= pd.to_datetime('2016-03-28') else 'skyblue', axis=1)
         combined_trace = go.Scatter(x=combined_df["date"], y=combined_df["sales"], mode='lines', name='History and Actual',
                                     line=dict(color='skyblue'), showlegend=True)
 
         fig.add_trace(combined_trace)
 
-        # Highlight the segment after March 28, 2016 with red color
+        # Highlight the segment after March 28, 2016 with light blue color
         actual_trace = go.Scatter(x=combined_df[combined_df["date"] >= pd.to_datetime('2016-03-28')]["date"],
                                   y=combined_df[combined_df["date"] >= pd.to_datetime('2016-03-28')]["sales"],
                                   mode='lines', name='Actual',
-                                  line=dict(color='red'), showlegend=True)
+                                  line=dict(color='lightblue'), showlegend=True)
 
         fig.add_trace(actual_trace)
 
-        # Add traces for prediction data
+        # Add traces for prediction data with light orange color
         fig.add_trace(go.Scatter(x=combined_df[combined_df["type"] == "Prediction"]["date"],
                                  y=combined_df[combined_df["type"] == "Prediction"]["sales"],
                                  mode='lines',
                                  name='Prediction',
-                                 line=dict(color='green')))
+                                 line=dict(color='orange')))
 
         # Update the layout of the figure
         fig.update_layout(
